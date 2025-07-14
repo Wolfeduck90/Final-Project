@@ -1,19 +1,23 @@
-# image_recognition_model.py
-import tensorflow as tf
-import numpy as np
-from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing import image
+# Image_Recognition_Model.py
 
-model = load_model('produce_quality_model.h5')
+import tensorflow as tf
+from tensorflow.keras.preprocessing import image
+import numpy as np
+
+# Load pre-trained CNN model (make sure the path is correct)
+model = tf.keras.models.load_model('models/produce_quality_cnn.h5')
+labels = ['Low', 'Medium', 'High']  # Quality categories
 
 def assess_quality(img_path):
-    """
-    img_path: Path to produce image
-    """
+    """Return quality score for uploaded crop image."""
     img = image.load_img(img_path, target_size=(128, 128))
     img_array = image.img_to_array(img) / 255.0
     img_array = np.expand_dims(img_array, axis=0)
 
-    prediction = model.predict(img_array)
-    categories = ['Low', 'Medium', 'High']
-    return categories[np.argmax(prediction)]
+    predictions = model.predict(img_array)[0]
+    label_index = np.argmax(predictions)
+    return labels[label_index]
+
+# INPUT FORMAT
+# quality = assess_quality("uploads/tomato_1.jpg")
+# print(f"Crop Quality: {quality}")

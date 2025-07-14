@@ -1,70 +1,35 @@
-# price_prediction_model.py
+# Price_Prediction_Model.py
 
-import requests
 import pandas as pd
-from datetime import datetime
+from sklearn.linear_model import LinearRegression
 
-# Primary source: Tridge API (mocked for now)
-def fetch_tridge_price(crop_name):
-    """
-    Fetch real-time price from Tridge (mocked endpoint).
-    Replace with actual API call when available.
-    """
-    try:
-        # Simulated response
-        response = {
-            "crop": crop_name,
-            "price_ZAR_per_kg": 18.68,
-            "trend": "down",
-            "timestamp": "2025-07-14"
-        }
-        return response
-    except Exception as e:
-        print(f"Tridge fetch failed: {e}")
-        return None
+def train_model(market_data):
+    """Train price predictor using crop yield + market trend index."""
+    X = market_data[['expected_yield_kg', 'market_trend_index']]
+    y = market_data['price_ZAR_per_kg']
+    model = LinearRegression()
+    model.fit(X, y)
+    return model
 
-# Fallback source: Selina Wamucii
-def fetch_selina_price(crop_name):
-    """
-    Fallback price fetch from Selina Wamucii (mocked).
-    """
-    try:
-        # Simulated response
-        response = {
-            "crop": crop_name,
-            "price_ZAR_per_kg": 19.82,
-            "trend": "stable",
-            "timestamp": "2025-07-13"
-        }
-        return response
-    except Exception as e:
-        print(f"Selina fetch failed: {e}")
-        return None
+def predict_price(model, user_input):
+    """Estimate price from user input."""
+    input_df = pd.DataFrame([{
+        'expected_yield_kg': user_input['expected_yield_kg'],
+        'market_trend_index': user_input['market_trend_index']
+    }])
+    prediction = model.predict(input_df)[0]
+    return round(prediction, 2)
 
-# Final fallback: Historical average
-def get_historical_average(crop_name):
-    """
-    Static fallback using historical data.
-    """
-    historical_prices = {
-        "tomato": 25.00,
-        "maize": 4.50,
-        "onion": 12.00
-    }
-    return {
-        "crop": crop_name,
-        "price_ZAR_per_kg": historical_prices.get(crop_name, 0),
-        "trend": "unknown",
-        "timestamp": str(datetime.today().date())
-    }
-
-# Decision logic
-def get_crop_price(crop_name):
-    """
-    Cascading fetch logic with fallback.
-    """
-    price_data = fetch_tridge_price(crop_name)
-    if not price_data:
-        price_data = fetch_selina_price(crop_name)
-    if not price_data:
-        price_data = get_historical
+def generate_insight(predicted_price, baseline_price):
+    """Text insight for farmer."""
+    if predicted_price < baseline_price * 0.9:
+        return f"⚠️ Prices are dropping (R{predicted_price}/kg). You might wait before selling."
+    elif predicted_price > baseline_price * 1.1:
+        return f"📈 Prices are rising (R{predicted_price}/kg). Good time to consider selling."
+    else:
+        return f"🤔 Prices are steady at R{predicted_price}/kg. Monitor market trends for changes."
+# INPUT FORMAT
+# user_input = {
+#     "expected_yield_kg": 1000,
+#     "market_trend_index": 0.85  # (e.g., seasonal demand indicator)
+# }

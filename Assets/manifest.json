@@ -1,0 +1,12 @@
+{
+  "logo": "Assets/logo.png",
+  "banner": "Assets/hero_banner.jpg",
+  "favicon": "Assets/favicon.ico",
+  "loader_gif": "Assets/loader.gif",
+  "mentor_badges": {
+    "Mentor": "Assets/badges/mentor.png",
+    "Contributor": "Assets/badges/contributor.png",
+    "Knowledge Sharer": "Assets/badges/knowledge_sharer.png"
+  },
+  "default_avatar": "Assets/default_avatar.jpg"
+}
